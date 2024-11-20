@@ -4,7 +4,7 @@
   "description": "This is a vitual library that offers a variety of book resources for lending services",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./index.js",
+    "dev": "npx nodemon ./index.js",
     "ui": "browser-sync start --config bs-config.js"
   },
   "author": "Flora",
