@@ -68,7 +68,7 @@ async function eBookNewArrivals(maxResults){
   return await response.json(); // return the JSON response
 }
 
-// --------------------to do-------------------------------
+// --------------------to do--------------------------------------------------
 // https://www.googleapis.com/books/v1/volumes?q=yourSearchTerm&startIndex=0&maxResults=10&key=yourAPIKey
 async function getPagination(input,start,num){
   let reqPaginationUrl=`${googleBook}/volumes?q=${input}&startIndex=${start}&maxResults=${num}&key=${process.env.GOOGLE_BOOK_API_KEY}`;

@@ -338,13 +338,12 @@ app.get("/bookdetail/:id", async (req, res) => {
   };
 
   let resultData=await book.formattingOneBook(bookDetail);
-  // console.log(resultData);
+  console.log(resultData.accessInfo.embeddable);
   let author = resultData.volumeInfo.authors[0];
   // console.log(author);
   let authorBooks = await book.getBooksByAuthor(author);
   // console.log(authorBooks);
   let booksData = authorBooks?.items || [];
-  
   let resultAuthorBooks = await book.formattingBooks(booksData,userID);
   // console.log(resultAuthorBooks);
   res.render("book-detail", {

@@ -46,6 +46,9 @@ block main-content
                                 input(type="hidden", name="favorite_id", value=book.id)
                                 button.btn.btn-danger.w-100.btn-sm(type="submit" data-bs-toggle="tooltip" data-bs-title="Save to your bookshelf") My Favorite
                                     i.ms-2.fa-solid.fa-heart
+                        if(userSession && (book.accessInfo.embeddable===true))
+                            a.btn.btn-success.w-100.btn-sm(href=`/ebook/${book.id}` data-bs-toggle="tooltip" data-bs-title="Preview the free e-book") Preview
+                                i.ms-2.fa-solid.fa-book
             p.mt-3.bg-warning-subtle.rounded-3.p-3 #{book.volumeInfo.description}
                 if userSession
                     i.text-secondary.ms-1.fa-solid.fa-volume-high.getVoice(style="font-size:1rem;" data-bs-toggle="tooltip" data-bs-title="Play the audio")
