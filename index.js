@@ -158,7 +158,7 @@ app.get("/", async (req, res) => {
   let lat, lon, myCountry;
   let location = await weather.getLocationA(address.ip);
   if (
-    location.error.info ===
+    location.error &&location.error.info ===
     "Your monthly usage limit has been reached. Please upgrade your Subscription Plan."
   ) {
     location = await weather.getLocationB(address.ip);
