@@ -28,3 +28,7 @@ password: flora.123
 NOTE: 
 1. If it touches the daily limits, free to generate your own Google Book API to place mine on .env file
 2. Free to change $maxresults varible to control the book number both in /modules/googleBook/api.js and index.js(I set $maxresults as the variable of some functions)
+
+Deploy: 
+https://floras-reading-space.onrender.com
+
