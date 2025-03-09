@@ -28,6 +28,7 @@ async function getLocationB(address){
 async function getWeather(lat,lon){
     const reqUrl=`${weather}?lat=${lat}&lon=${lon}&appid=${process.env.WEATHER_KEY}`;
     let response = await fetch(reqUrl,options);
+    console.log("get weather api: ",response);
     return await response.json(); 
 }
 

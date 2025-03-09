@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 // npm install express-session cookie-parser
 const cookieParser = require("cookie-parser");
-const sessions = require("express-session");
+const sessions = require("cookie-session");
 const flash = require("connect-flash");
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
@@ -593,10 +593,8 @@ app.get("/profile/:userID", async (req, res) => {
     let address = await weather.getIP();
     let lat, lon, myCountry;
     let location = await weather.getLocationA(address.ip);
-    if (
-      location.error.info ===
-      "Your monthly usage limit has been reached. Please upgrade your Subscription Plan."
-    ) {
+    console.log(location);
+    if (!location) {
       location = await weather.getLocationB(address.ip);
       if (location === "cannot get locationB") {
         // get Humber location
@@ -615,11 +613,11 @@ app.get("/profile/:userID", async (req, res) => {
       lon = location.longitude;
       myCountry = location.country_code;
     }
-    // console.log(lat,lon);
+    console.log(lat,lon);
     let flag = `https://flagsapi.com/${myCountry}/flat/64.png`;
     // console.log(flag);
     let weatherSection = await weather.getWeather(lat, lon);
-    // console.log(weatherSection);
+    console.log(weatherSection);
     let kelvin = await weatherSection.main.temp;
     let celsius = (kelvin - 273.15).toFixed(1);
     // console.log(celsius);
