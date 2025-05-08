@@ -5,12 +5,12 @@ const dotenv = require("dotenv");
 dotenv.config();
 // npm install express-session cookie-parser
 const cookieParser = require("cookie-parser");
-const sessions = require("cookie-session");
+const session = require("express-session");
 const flash = require("connect-flash");
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
 const { ObjectId } = require("mongodb");
-
+const MongoStore = require('connect-mongo');
 const book = require("./modules/googleBook/api");
 const weather = require("./modules/weather-card");
 const background = require("./modules/background");
@@ -45,12 +45,14 @@ app.use(flash());
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(cookieParser());
 app.use(
-  sessions({
+  session({
     secret: `${process.env.SESSION_SECRET}`,
     saveUninitialized: true,
     cookie: { secure: false, maxAge: oneDay },
     resave: false,
-  })
+    store: new session.MemoryStore()
+  },
+)
 );
 app.use((req, res, next) => {
   app.locals.userSession = req.session.user || null; 
@@ -111,8 +113,15 @@ app.post("/login/submit", async (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
-  req.session.destroy();
-  res.redirect("/login");
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Session destruction error:", err);
+      return res.status(500).send("Logout failed");
+    }
+    // Clear the session cookie
+    res.clearCookie("sessionId"); // Matches your login cookie name
+    res.redirect("/login");
+  });
 });
 
 app.get("/register", async (req, res) => {
@@ -148,37 +157,44 @@ app.post("/register", async (req, res) => {
 
 // HOME: weather card, nasa background, search function
 app.get("/", async (req, res) => {
+  res.type('text/html');
   let nasaImage = await background.getNasaImage();
   let nasaBg = nasaImage.hdurl;
 
   let randomQuote=await quote.getQuote();
   // console.log(randomQuote[0]);
   // weather card
-  let address = await weather.getIP();
-  let lat, lon, myCountry;
-  let location = await weather.getLocationA(address.ip);
-  if (
-    location.error &&location.error.info ===
-    "Your monthly usage limit has been reached. Please upgrade your Subscription Plan."
-  ) {
-    location = await weather.getLocationB(address.ip);
-    if (location === "cannot get locationB") {
-      // get Humber location
-      // console.log("locationB is wrong");
-      lat = "43.728822";
-      lon = "-79.609511";
-      myCountry = "CA";
-    } else {
-      let loc = location.loc;
-      // console.log(loc);
-      [lat, lon] = loc.split(",").map(Number);
-      myCountry = location.country;
-    }
-  } else {
-    lat = location.latitude;
-    lon = location.longitude;
-    myCountry = location.country_code;
-  }
+  // let address = await weather.getIP();
+  // let lat, lon, myCountry;
+  // let location = await weather.getLocationA(address.ip);
+  // if (
+  //   location.error &&location.error.info ===
+  //   "Your monthly usage limit has been reached. Please upgrade your Subscription Plan."
+  // ) {
+  //   location = await weather.getLocationB(address.ip);
+  //   if (location === "cannot get locationB") {
+  //     // get Humber location
+  //     // console.log("locationB is wrong");
+  //     lat = "43.728822";
+  //     lon = "-79.609511";
+  //     myCountry = "CA";
+  //   } else {
+  //     let loc = location.loc;
+  //     // console.log(loc);
+  //     [lat, lon] = loc.split(",").map(Number);
+  //     myCountry = location.country;
+  //   }
+  // } else {
+  //   lat = location.latitude;
+  //   lon = location.longitude;
+  //   myCountry = location.country_code;
+  // }
+
+  lat = "43.728822";
+  lon = "-79.609511";
+  myCountry = "CA";
+
+
   // console.log(lat,lon);
   let flag = `https://flagsapi.com/${myCountry}/flat/64.png`;
   // console.log(flag);
@@ -192,7 +208,7 @@ app.get("/", async (req, res) => {
   res.render("index", {
     quote: randomQuote[0],
     weather: weatherSection,
-    position: location,
+    // position: location,
     temp: celsius,
     date: shortDate,
     flag: flag,
@@ -590,30 +606,33 @@ app.get("/profile/:userID", async (req, res) => {
     userDetail.favorite[i].title = favoriteBook.volumeInfo.title;
   }
     // weather card
-    let address = await weather.getIP();
-    let lat, lon, myCountry;
-    let location = await weather.getLocationA(address.ip);
-    console.log(location);
-    if (!location) {
-      location = await weather.getLocationB(address.ip);
-      if (location === "cannot get locationB") {
-        // get Humber location
-        // console.log("locationB is wrong");
-        lat = "43.728822";
-        lon = "-79.609511";
-        myCountry = "CA";
-      } else {
-        let loc = location.loc;
-        // console.log(loc);
-        [lat, lon] = loc.split(",").map(Number);
-        myCountry = location.country;
-      }
-    } else {
-      lat = location.latitude;
-      lon = location.longitude;
-      myCountry = location.country_code;
-    }
-    console.log(lat,lon);
+    // let address = await weather.getIP();
+    // let lat, lon, myCountry;
+    // let location = await weather.getLocationA(address.ip);
+    // console.log(location);
+    // if (!location) {
+    //   location = await weather.getLocationB(address.ip);
+    //   if (location === "cannot get locationB") {
+    //     // get Humber location
+    //     // console.log("locationB is wrong");
+    //     lat = "43.728822";
+    //     lon = "-79.609511";
+    //     myCountry = "CA";
+    //   } else {
+    //     let loc = location.loc;
+    //     // console.log(loc);
+    //     [lat, lon] = loc.split(",").map(Number);
+    //     myCountry = location.country;
+    //   }
+    // } else {
+    //   lat = location.latitude;
+    //   lon = location.longitude;
+    //   myCountry = location.country_code;
+    // }
+    // console.log(lat,lon);
+    lat = "43.728822";
+    lon = "-79.609511";
+    myCountry = "CA";
     let flag = `https://flagsapi.com/${myCountry}/flat/64.png`;
     // console.log(flag);
     let weatherSection = await weather.getWeather(lat, lon);
@@ -629,7 +648,7 @@ app.get("/profile/:userID", async (req, res) => {
     userID:id, 
     days:days,      
     weather: weatherSection,
-    position: location,
+    // position: location,
     temp: celsius,
     date: shortDate,
     flag: flag, });
@@ -842,6 +861,7 @@ app.get("/admin/booklist", async (req, res) => {
       .toISOString()
       .split("T")[0];
     let googleBook = await book.getBookDetail(b.bookID);
+    console.log(googleBook.volumeInfo);
     const imageLinks = googleBook.volumeInfo.imageLinks || {};
     googleBook.volumeInfo.imageUrl =
       imageLinks.smallThumbnail ||

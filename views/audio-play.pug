@@ -5,7 +5,12 @@ block main-content
     div.col-md-6.offset-md-3.mb-2(style="height:65vh;")
         .d-flex.justify-content-between
             a.w-25.btn.btn-outline-dark.my-2(href="/tool") Back
-            a.w-25.btn.btn-outline-dark.my-2(href="/audioplayground") Play Again 
+            button.getVoice.text-secondary.ms-1(style="font-size:1rem; background:none; border:none; cursor:pointer;"
+            data-bs-toggle="tooltip" 
+            data-bs-title="Play the audio"
+            )
+                i.fa-solid.fa-volume-high
+            //- a.w-25.btn.btn-outline-dark.my-2(href="/audioplayground") Play Again 
         p.mt-1.bg-warning-subtle.rounded-3.p-3 #{audioText}
             i.text-secondary.ms-1.fa-solid.fa-volume-high.getVoice(style="font-size:1rem;" data-bs-toggle="tooltip" data-bs-title="Play the audio")
 
@@ -17,27 +22,58 @@ block scripts
     script(async defer src="/script.js")
     script(src="https://code.responsivevoice.org/responsivevoice.js?key=k3uoB18K")
     script.
-    script.
-        document.addEventListener("DOMContentLoaded", function () {
-            console.log("ResponsiveVoice script loaded and ready.");
-            var myText = !{JSON.stringify(audioText)};
-            
-            setTimeout(function() {
-                if (!responsiveVoice.isPlaying()) {
-                    responsiveVoice.speak(myText);
-                } else {
-                    console.log("Speech is already playing, please wait.");
-                }
-            }, 1000); 
+        document.addEventListener("DOMContentLoaded", function() {
+        const myText = !{JSON.stringify(audioText)};
+        const voiceButton = document.querySelector('.getVoice');
 
-            var voiceButton = document.querySelector('.getVoice');
-            voiceButton.onclick = function() {
-                console.log("Button clicked!");
-                console.log("Input:", myText);
-                if (!responsiveVoice.isPlaying()) {
-                    responsiveVoice.speak(myText);
-                } else {
-                    console.log("Speech is already playing, please wait.");
+        // 初始化语音引擎
+        function initTTS() {
+            // 预热音频上下文（解决浏览器自动播放限制）
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioContext.resume();
+        }
+
+        // 增强版播放函数
+        function playAudio() {
+            initTTS();
+            
+            // 方案1: ResponsiveVoice
+            if(window.responsiveVoice) {
+            responsiveVoice.cancel();
+            responsiveVoice.speak(myText, "UK English Female", {
+                rate: 1,
+                pitch: 1,
+                volume: 1,
+                onstart: () => console.log("RV: Playback started"),
+                onerror: (e) => {
+                console.error("RV Error:", e);
+                tryNativeTTS();
                 }
-            };
-        });
+            });
+            return;
+            }
+            tryNativeTTS();
+        }})
+        //- document.addEventListener("DOMContentLoaded", function () {
+        //-     console.log("ResponsiveVoice script loaded and ready.");
+        //-     var myText = !{JSON.stringify(audioText)};
+            
+        //-     setTimeout(function() {
+        //-         if (!responsiveVoice.isPlaying()) {
+        //-             responsiveVoice.speak(myText);
+        //-         } else {
+        //-             console.log("Speech is already playing, please wait.");
+        //-         }
+        //-     }, 1000); 
+
+        //-     var voiceButton = document.querySelector('.getVoice');
+        //-     voiceButton.onclick = function() {
+        //-         console.log("Button clicked!");
+        //-         console.log("Input:", myText);
+        //-         if (!responsiveVoice.isPlaying()) {
+        //-             responsiveVoice.speak(myText);
+        //-         } else {
+        //-             console.log("Speech is already playing, please wait.");
+        //-         }
+        //-     };
+        //- });
